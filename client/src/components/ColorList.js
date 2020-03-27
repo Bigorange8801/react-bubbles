@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import axios from "axios";
+
+import axiosWithAuth from '../util/axiosWithAuth';
 
 const initialColor = {
   color: "",
@@ -7,7 +8,6 @@ const initialColor = {
 };
 
 const ColorList = ({ colors, updateColors }) => {
-  console.log(colors);
   const [editing, setEditing] = useState(false);
   const [colorToEdit, setColorToEdit] = useState(initialColor);
 
@@ -18,13 +18,16 @@ const ColorList = ({ colors, updateColors }) => {
 
   const saveEdit = e => {
     e.preventDefault();
-    // Make a put request to save your updated color
-    // think about where will you get the id from...
-    // where is is saved right now?
+    console.log(colorToEdit.id);
+    axiosWithAuth()
+      .put(`http://localhost:5000/api/colors/${colorToEdit.id}`, colorToEdit)
+      .catch(err => console.log(err.response));
   };
 
-  const deleteColor = color => {
-    // make a delete request to delete this color
+  const deleteColor = colors => {
+    axiosWithAuth()
+      .delete(`http://localhost:5000/api/colors/${colorToEdit.id}`)
+      .catch(err => console.log(err.response));
   };
 
   return (
@@ -34,12 +37,8 @@ const ColorList = ({ colors, updateColors }) => {
         {colors.map(color => (
           <li key={color.color} onClick={() => editColor(color)}>
             <span>
-              <span className="delete" onClick={e => {
-                    e.stopPropagation();
-                    deleteColor(color)
-                  }
-                }>
-                  x
+              <span className="delete" onClick={() => deleteColor(color)}>
+                x
               </span>{" "}
               {color.color}
             </span>
@@ -75,8 +74,11 @@ const ColorList = ({ colors, updateColors }) => {
             />
           </label>
           <div className="button-row">
-            <button type="submit">save</button>
+            <button type="submit" onClick={event => saveEdit(event, colors)}>
+              save
+            </button>
             <button onClick={() => setEditing(false)}>cancel</button>
+            <button onClick={()=> setEditing(false)}>delete</button>
           </div>
         </form>
       )}
